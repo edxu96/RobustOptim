@@ -1,5 +1,6 @@
 # RobustOptimization
-Introductory (adjustable) robust optimization by matrix computation
+Introductory (adjustable) robust optimization by matrix computation with box uncertainty and budget of uncertainty.
+
 
 author: Edward J. Xu
 last update date: March 31th, 2019
