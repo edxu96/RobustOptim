@@ -8,14 +8,16 @@ module RobustMilp_EDXU
     using GLPKMathProgInterface
     # using PrettyTables
     function RobustMilpBoxBudget(; num_x, num_y, vec_min_y, vec_max_y, vec_c, vec_f, vec_b, mat_a, mat_b,
-        mat_a_nominal, mat_a_hat, mat_b_nominal, vec_b_norminal, epsilon, cap_gamma)
-        num_row = length(mat_a_nominal[:,1])
-        num_col = length(mat_a_nominal[1,:])
-        if cap_gamma > num_col
-            println("Error: cap_gamma is greater than num_row in nominal and hat data!")
+        mat_a_bar, mat_a_hat, mat_b_bar, vec_b_bar, vec_gammaCap)
+        num_row = length(mat_a_bar[:,1])
+        num_col = length(mat_a_bar[1,:])
+        for i = 1: num_row
+            if vec_gammaCap[i] > num_col
+                println("Error: vec_gammaCap[$i] is greater than num_row in nominal and hat data!")
+            end
         end
         println("---------------------------------------------------------\n",
-                "---------------- 1/2. Begin Optimization ----------------\n",
+                "--- 1/2. Robust MILP with Box Uncertainty and Budget ----\n",
                 "---------------------------------------------------------\n")
         model = Model(solver = GLPKSolverMIP())
         @variable(model, vec_y[1: num_y], Int)
@@ -24,18 +26,20 @@ module RobustMilp_EDXU
         @constraint(model, vec_y[1: num_y] .<= vec_max_y)
         @constraint(model, vec_y[1: num_y] .>= vec_min_y)
         @constraint(model, mat_a * vec_x + mat_b * vec_y .>= vec_b)
-        #
+        # Transformation of Box Uncertainty.
         @variable(model, vec_lambda[1: num_row] >= 0)
         @variable(model, mat_mu[1: num_row, 1: num_x] >= 0)
-        @variable(model, vec_z[1: num_x])
+        @variable(model, vec_z[1: num_x] >= 0)
         @constraint(model, - vec_z .<= vec_x)
         @constraint(model, vec_x .<= vec_z)
         for i = 1: num_row
-            @constraint(model, transpose(mat_a_nominal[i, :]) * vec_x + cap_gamma * vec_lambda[i] +
-                sum(mat_mu[i, :]) + transpose(mat_b_nominal[i, :]) * vec_y <= vec_b_norminal[i])
-            @constraint(model, hcat(vec_lambda[i], num_x) + hcat(mat_mu[i, :]) .>=  hcat(mat_a_hat[i, :]) .* vec_z[:])
+            # sum() of variables without coefficients can be used directly
+            @constraint(model, transpose(mat_a_bar[i, :]) * vec_x + vec_gammaCap[i] * vec_lambda[i] +
+                sum(mat_mu[i, :]) + transpose(mat_b_bar[i, :]) * vec_y <= vec_b_bar[i])
+            @constraint(model, vec_lambda[i] .+ hcat(mat_mu[i, :]) .>=  hcat(mat_a_hat[i, :]) .* vec_z[:])
         end
         solve(model)
+        obj_result = getobjectivevalue(model)
         vec_result_y = getvalue(vec_y)
         vec_result_x = getvalue(vec_x)
         vec_result_z = getvalue(vec_z)
@@ -44,6 +48,6 @@ module RobustMilp_EDXU
         println("---------------------------------------------------------\n",
                 "------------------ 2/2. Nominal Ending ------------------\n",
                 "---------------------------------------------------------\n")
-        return vec_result_y, vec_result_x, vec_result_z, mat_result_mu, vec_result_lambda
+        return obj_result, vec_result_y, vec_result_x, vec_result_z, mat_result_mu, vec_result_lambda
     end
 end
