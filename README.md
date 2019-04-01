@@ -1,7 +1,7 @@
 # RobustOptimization
 Introductory (adjustable) robust optimization by matrix computation with box uncertainty and budget of uncertainty.
 
-author: Edward J. Xu, edxu96@outlook.com
+author: Edward J. Xu, edxu96@outlook.com  
 last update date: April 1st, 2019
 ***
 
