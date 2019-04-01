@@ -3,11 +3,10 @@ Introductory (adjustable) robust optimization by matrix computation with box unc
 
 author: Edward J. Xu, edxu96@outlook.com
 last update date: April 1st, 2019
-
 ***
+
 Detailed explanation can be found in file [Cookbook for Robust Optimization, EDXU](cookbook_edxu.pdf)
 
-***
 ## Examples
 
 Example 1: Production Planning with Uncertainty in Production Efficiency
