@@ -1,5 +1,5 @@
 # RobustOptimization
-Introductory (adjustable) robust optimization by matrix computation with box uncertainty and budget of uncertainty.
+Introductory (adjustable) robust optimization by matrix computation.
 
 author: Edward J. Xu, edxu96@outlook.com  
 last update date: April 1st, 2019
@@ -7,7 +7,14 @@ last update date: April 1st, 2019
 
 Detailed explanation can be found in file [Cookbook for Robust Optimization, EDXU](cookbook_edxu.pdf)
 
-## Examples
+## RO with Box Uncertainty and Budget of Uncertainty
+
+```
+RobustMilpBoxBudget(; num_x, num_y, vec_min_y, vec_max_y, vec_c, vec_f, vec_b, mat_a, mat_b,
+    mat_a_bar, mat_a_hat, mat_b_bar, vec_b_bar, vec_gammaCap)
+```
+
+### Examples
 
 Example 1: Production Planning with Uncertainty in Production Efficiency
 
