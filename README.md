@@ -7,6 +7,12 @@ last update date: April 1st, 2019
 
 Detailed explanation can be found in file [Cookbook for Robust Optimization, EDXU](cookbook_edxu.pdf)
 
+## How to make robust optimization less conservative?
+
+- Use of different uncertainty sets by including restricting the uncertainty sets, e.g. using 95% confidence interval  
+- Use a budget of uncertainty, so not all parameters can take their worst case  
+- Introduce recourse decisions to form adjustable robust optimization  
+
 ## RO with Box Uncertainty and Budget of Uncertainty
 
 ```
