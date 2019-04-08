@@ -23,17 +23,17 @@ milpAdjustBox(; num_x, num_y, num_z, vec_min_y, vec_max_y, vec_c, vec_f, vec_g, 
     mat_a, mat_b, mat_d, mat_a_bar, mat_a_hat, mat_b_bar, mat_d_bar, vec_b_bar)
 ```
 
-### Examples
+## Examples
 
-Example 1: Production Planning with Uncertainty in Production Efficiency
+### Example 1: Production Planning with Uncertainty in Production Efficiency
 
 Formulate a robust optimization model that decides the number of machines and production quantities for each product and machine to have minimal cost and cover the demand in all cases of production time deviation. Use a budget of uncertainty.
 
-Problem description can be found in the examples of file [Cookbook for Robust Optimization, EDXU](Cookbook_RobustOptim_EDXU.pdf). There are form of solutions in Julia, with one in matrix form and one in traditional form.
+Problem description can be found in first example of file [Cookbook for Robust Optimization, EDXU](Cookbook_RobustOptim_EDXU.pdf). There are form of solutions in Julia, with one in matrix form and one in traditional form.
 
-Example 2: Production Planning of Two-Stage Stochastic LP with Box Uncertainty
+### Example 2: Production Planning of Two-Stage Stochastic LP with Box Uncertainty
 
-Problem description can be found in the examples of file [Cookbook for Robust Optimization, EDXU](Cookbook_RobustOptim_EDXU.pdf). There are form of solutions in Julia, with one in matrix form and one in traditional form.
+Problem description can be found in second example of file [Cookbook for Robust Optimization, EDXU](Cookbook_RobustOptim_EDXU.pdf). There are form of solutions in Julia, with one in matrix form and one in traditional form.
 
 ***
 
