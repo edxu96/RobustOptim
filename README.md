@@ -1,11 +1,7 @@
 # RobustOptimization
 Introductory (adjustable) robust optimization by matrix computation.
 
-author: Edward J. Xu, edxu96@outlook.com  
-last update date: April 1st, 2019
-***
-
-Detailed explanation can be found in file [Cookbook for Robust Optimization, EDXU](cookbook_edxu.pdf)
+Detailed explanation can be found in file [Cookbook for Robust Optimization, EDXU](Cookbook_RobustOptim_EDXU.pdf)
 
 ## How to make robust optimization less conservative?
 
@@ -15,9 +11,16 @@ Detailed explanation can be found in file [Cookbook for Robust Optimization, EDX
 
 ## RO with Box Uncertainty and Budget of Uncertainty
 
-```
+```Julia
 RobustMilpBoxBudget(; num_x, num_y, vec_min_y, vec_max_y, vec_c, vec_f, vec_b, mat_a, mat_b,
     mat_a_bar, mat_a_hat, mat_b_bar, vec_b_bar, vec_gammaCap)
+```
+
+## RO of Two-Stage Stochastic LP with Box Uncertainty
+
+```Julia
+milpAdjustBox(; num_x, num_y, num_z, vec_min_y, vec_max_y, vec_c, vec_f, vec_g, vec_b,
+    mat_a, mat_b, mat_d, mat_a_bar, mat_a_hat, mat_b_bar, mat_d_bar, vec_b_bar)
 ```
 
 ### Examples
@@ -26,4 +29,13 @@ Example 1: Production Planning with Uncertainty in Production Efficiency
 
 Formulate a robust optimization model that decides the number of machines and production quantities for each product and machine to have minimal cost and cover the demand in all cases of production time deviation. Use a budget of uncertainty.
 
-Problem description can be found in first page of file [exerciseSolution_productionPlanning.pdf](example_productionPlanning_dtu02435/exerciseSolution_productionPlanning.pdf). There are form of solutions in Julia, with one in matrix form and one in traditional form.
+Problem description can be found in the examples of file [Cookbook for Robust Optimization, EDXU](Cookbook_RobustOptim_EDXU.pdf). There are form of solutions in Julia, with one in matrix form and one in traditional form.
+
+Example 2: Production Planning of Two-Stage Stochastic LP with Box Uncertainty
+
+Problem description can be found in the examples of file [Cookbook for Robust Optimization, EDXU](Cookbook_RobustOptim_EDXU.pdf). There are form of solutions in Julia, with one in matrix form and one in traditional form.
+
+***
+
+Author: Edward J. Xu, edxu96@outlook.com  
+Last Update Date: April 8th, 2019

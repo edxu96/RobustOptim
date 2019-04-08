@@ -1,12 +1,15 @@
 # Robust Optimization
-# Version: 2.0
+# 1. Function for MILP with Box Uncertainty and Budget of Uncertainty
+# 2. Fucntion for Two-Stage Stochastic LP with Box Uncertainty
+# Version: 3.0
 # Author: Edward J. Xu, edxu96@outlook.com
-# Date: April 7th, 2019
+# Date: April 8th, 2019
 module RobustOptim
 using JuMP
 using GLPKMathProgInterface
 # using PrettyTables
 
+# Function for MILP with Box Uncertainty and Budget of Uncertainty
 function milpBoxBudget(; num_x, num_y, vec_min_y, vec_max_y, vec_c, vec_f, vec_b, mat_a, mat_b,
     mat_a_bar, mat_a_hat, mat_b_bar, vec_b_bar, vec_gammaCap)
     num_row = length(mat_a_bar[:,1])
@@ -17,8 +20,10 @@ function milpBoxBudget(; num_x, num_y, vec_min_y, vec_max_y, vec_c, vec_f, vec_b
         end
     end
     println("---------------------------------------------------------\n",
-            "--- 1/2. Robust MILP with Box Uncertainty and Budget ----\n",
+            "    1/2. Robust MILP with Box Uncertainty and Budget\n",
             "---------------------------------------------------------\n")
+    println("Input: vec_gammaCap = $vec_gammaCap.")
+    #
     model = Model(solver = GLPKSolverMIP())
     @variable(model, vec_y[1: num_y], Int)
     @variable(model, vec_x[1: num_x] >= 0)
@@ -41,50 +46,66 @@ function milpBoxBudget(; num_x, num_y, vec_min_y, vec_max_y, vec_c, vec_f, vec_b
     solve(model)
     obj_result = getobjectivevalue(model)
     vec_result_y = getvalue(vec_y)
+    println("Result: vec_y = $vec_result_y.")
     vec_result_x = getvalue(vec_x)
+    println("Result: vec_x = $vec_result_x.")
     vec_result_z = getvalue(vec_z)
     mat_result_mu = getvalue(mat_mu)
     vec_result_lambda = getvalue(vec_lambda)
     println("---------------------------------------------------------\n",
-            "------------------ 2/2. Nominal Ending ------------------\n",
+            "   2/2. Nominal Ending\n",
             "---------------------------------------------------------\n")
     return obj_result, vec_result_y, vec_result_x, vec_result_z, mat_result_mu, vec_result_lambda
 end
 
-function lpAdjustBox(; num_x, num_y, vec_c, vec_f, vec_b, mat_a, mat_b, mat_a_bar, mat_a_hat, mat_b_bar, vec_b_bar)
+# Fucntion for Two-Stage Stochastic LP with Box Uncertainty
+function milpAdjustBox(; num_x, num_y, num_z, vec_min_y, vec_max_y, vec_c, vec_f, vec_g, vec_b,
+    mat_a, mat_b, mat_d, mat_a_bar, mat_a_hat, mat_b_bar, mat_d_bar, vec_b_bar)
     println("---------------------------------------------------------\n",
-            "---- 1/2. Adjustable Robust LP with Box Uncertainty -----\n",
+            "   1/2. Adjustable Robust LP with Box Uncertainty\n",
             "---------------------------------------------------------\n")
-    model = Model(solver = GLPKSolverLP())
+    model = Model(solver = GLPKSolverMIP())
     # 1. Standard LP
+    @variable(model, vec_y[1: num_y], Int)
     @variable(model, vec_x[1: num_x] >= 0)
-    @objective(model, Min, (transpose(vec_c) * vec_x)[1] + z)
-    @constraint(model, mat_a * vec_x + mat_b * vec_y .>= vec_b)
+    @variable(model, gamma)
+    @variable(model, vec_alpha[1: num_z])
+    @variable(model, vec_theta1[1: num_z])
+    @objective(model, Min, (transpose(vec_f) * vec_y + transpose(vec_c) * vec_x)[1] + gamma)
+    @constraint(model, mat_b * vec_y + mat_a * vec_x + mat_d * (vec_alpha + vec_theta1) .>= vec_b)
     # 2. Get rid of the uncertainty in objective function
-    @variable(model, z)
-    @variable(model, vec_alpha[1: num_y])
-    @variable(model, vec_beta[1: num_y])
-    @variable(model, vec_theta1[1: num_y])
-    @constraint(model, z >= transpose(vec_f) * (vec_beta + vec_theta1))
-    @constraint(model, - vec_theta1 .<= vec_beta)
-    @constraint(model, vec_beta .<= vec_theta1)
+    @variable(model, vec_beta[1: num_z])
+    @constraint(model, gamma >= (transpose(vec_g) * (vec_alpha + vec_theta1))[1])
+    @constraint(model, vec_theta1 .<= vec_beta)
+    @constraint(model, - vec_beta .<= vec_theta1)
+    @constraint(model, vec_alpha .>= - vec_theta1)  # z(zeta) must be greater than 0
     # 3. Transformation of Box Uncertainty.
-    @variable(model, vec_theta2[1: num_y])
-    @constraint(model, mat_a_bar * vec_x + vec_theta2 + vec_b_bar * (vec_alpha + vec_theta1) .<= vec_b_bar)
-    @constraint(model, - vec_theta2 .<= mat_a_hat * vec_x)
-    @constraint(model, mat_a_hat * vec_x .<= vec_theta2)
+    @variable(model, vec_theta2[1: num_z])
+    vec_theta2_rep = (ones(num_y, num_z) .* vec_theta2')[:]  # Repeat every theta2 num_y times and then concatenate.
+    @constraint(model, mat_b_bar * vec_y + mat_a_bar * vec_x + mat_a_hat * vec_theta2_rep +
+        mat_d_bar * (vec_alpha + vec_theta1) .<= vec_b_bar)
+    @constraint(model, vec_theta2_rep .<= vec_x)
+    @constraint(model, - vec_x .<= vec_theta2_rep)
+    # @constraint(model, [m = 1: num_y], sum([mat_a_bar[m, (p-1) * num_y + m] * vec_x[(p-1) * num_y + m] + vec_theta2[p]]
+    #     for p = 1: 10)[1] + mat_b_bar[m, m] * vec_y[m] <= vec_b_bar[m])
+    # @constraint(model, [m = 1: num_y, p = 1: num_z], - mat_a_hat[m, (p-1) * num_y + m] * vec_x[(p-1) * num_y + m]
+    #     <= vec_theta2[p])
+    # @constraint(model, [m = 1: num_y, p = 1: num_z], vec_theta2[p] <=
+    #     mat_a_hat[m, (p-1) * num_y + m] * vec_x[(p-1) * num_y + m])
     # Solve the model
     solve(model)
     obj_result = getobjectivevalue(model)
     vec_result_y = getvalue(vec_y)
+    println("Result: vec_y = $vec_result_y.")
     vec_result_x = getvalue(vec_x)
-    vec_result_z = getvalue(vec_z)
-    mat_result_mu = getvalue(mat_mu)
-    vec_result_lambda = getvalue(vec_lambda)
+    println("Result: vec_x = $vec_result_x.")
+    vec_result_theta1 = getvalue(vec_theta1)
+    vec_result_theta2 = getvalue(vec_theta2)
+    vec_result_gamma = getvalue(gamma)
     println("---------------------------------------------------------\n",
-            "------------------ 2/2. Nominal Ending ------------------\n",
+            "   2/2. Nominal Ending\n",
             "---------------------------------------------------------\n")
-    return obj_result, vec_result_y, vec_result_x, vec_result_z, mat_result_mu, vec_result_lambda
+    return (obj_result, vec_result_y, vec_result_x, vec_result_gamma, vec_result_theta1, vec_result_theta2)
 end
 
 end
