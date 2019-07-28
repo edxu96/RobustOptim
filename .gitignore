@@ -5,9 +5,3 @@
 .AppleDouble
 .LSOverride
 .idea
-files
-
-*.jl.cov
-*.jl.*.cov
-*.jl.mem
-deps/deps.jl
