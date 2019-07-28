@@ -1,7 +1,7 @@
-# RobustOptimization
+# RobustOptim
 Introductory (adjustable) robust optimization by matrix computation.
 
-Detailed explanation can be found in file [Cookbook for Robust Optimization, EDXU](Cookbook_RobustOptim_EDXU.pdf)
+Detailed explanation can be found in file [Cookbook for Robust Optimization, EDXU](/files/cookbook.pdf)
 
 ## How to make robust optimization less conservative?
 
