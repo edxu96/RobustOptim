@@ -3,6 +3,8 @@ Introductory (adjustable) robust optimization by matrix computation.
 
 Detailed explanation can be found in file [Cookbook for Robust Optimization, EDXU](files/cookbook.pdf)
 
+This repo has been archived in 190728. New update will be made to [edxu96/MatrixOptim](https://github.com/edxu96/MatrixOptim), which is the aggregation of robust optimization and matrix optimization. It's in matrix form as well, and there is a new function tool to convert the model to matrix form.
+
 ## How to make robust optimization less conservative?
 
 - Use of different uncertainty sets by including restricting the uncertainty sets, e.g. using 95% confidence interval  
